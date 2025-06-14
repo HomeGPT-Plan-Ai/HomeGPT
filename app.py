@@ -6,7 +6,7 @@ st.set_page_config(
     page_title="Custom Home Design Assistant",
     page_icon="🏠",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 # Custom CSS for better styling
@@ -133,6 +133,9 @@ st.markdown("""
         overflow: auto;
         opacity: 0;
         transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .modal.show {
@@ -142,19 +145,20 @@ st.markdown("""
     .modal-content {
         margin: auto;
         display: block;
-        max-width: 90%;
-        max-height: 90vh;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0.9);
-        transition: transform 0.3s ease;
+        max-width: 98vw;
+        max-height: 98vh;
+        object-fit: contain;
+        position: relative;
+        transform: none;
+        transition: all 0.3s ease;
         border-radius: 8px;
         box-shadow: 0 0 30px rgba(0,0,0,0.3);
     }
 
     .modal.show .modal-content {
-        transform: translate(-50%, -50%) scale(1);
+        transform: none;
+        max-width: 98vw;
+        max-height: 98vh;
     }
 
     .close {
@@ -187,6 +191,171 @@ st.markdown("""
         font-family: 'Inter', 'Segoe UI', Roboto, "Helvetica Neue", Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Dark Mode Styling */
+    @media (prefers-color-scheme: dark) {
+        .stApp {
+            background: linear-gradient(135deg, #2c3e50 0%, #1a2c3e 100%) !important;
+            color: #ecf0f1 !important;
+        }
+        
+        .input-section, .result-section {
+            background-color: #34495e !important;
+            border: 1px solid #4a657e !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        }
+
+        .input-section:hover, .result-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4) !important;
+        }
+
+        .main-header {
+            color: #5DADE2 !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
+        }
+
+        .sub-header {
+            color: #bdc3c7 !important;
+        }
+        
+        /* Streamlit Sidebar specific styling for dark mode */
+        div[data-testid="stSidebar"] {
+            background-color: #1a2c3e !important;
+            color: #ecf0f1 !important;
+        }
+
+        div[data-testid="stSidebar"] .st-emotion-cache-1pxy109, /* General text in sidebar */
+        div[data-testid="stSidebar"] p, /* Paragraphs in sidebar */
+        div[data-testid="stSidebar"] li, /* List items in sidebar */
+        div[data-testid="stSidebar"] h1, div[data-testid="stSidebar"] h2, div[data-testid="stSidebar"] h3, div[data-testid="stSidebar"] h4, div[data-testid="stSidebar"] h5, div[data-testid="stSidebar"] h6 {
+            color: #ecf0f1 !important;
+        }
+
+        /* Adjust text input and dropdowns for dark mode */
+        /* Labels */
+        .stTextInput > label,
+        .stTextArea > label,
+        .stSelectbox > label,
+        .stRadio > label,
+        .stCheckbox > label,
+        [data-testid^="stWidgetLabel"] label, /* More generic label targeting */
+        /* Fallback for labels that might be wrapped differently */
+        div[data-testid*="stHorizontalBlock"] label, 
+        div[data-testid*="stVerticalBlock"] label {
+            color: #ecf0f1 !important;
+        }
+
+        /* Input fields and selected values */
+        .stTextInput > div > div > input,
+        .stTextArea > div > textarea,
+        .stSelectbox > div > div > div > div > div, /* For selectbox value display */
+        .stSelectbox > div > div > div[role="listbox"], /* For selectbox dropdown list */
+        /* Targeting Streamlit's internal components directly */
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stTextArea"] textarea,
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] div[tabindex],
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] div[role="button"],
+        div[data-testid="stRadio"] label div[data-baseweb="radio"],
+        div[data-testid="stCheckbox"] label div[data-baseweb="checkbox"] {
+            background-color: #2c3e50 !important;
+            color: #ecf0f1 !important;
+            border: 1px solid #4a657e !important;
+        }
+
+        /* Placeholders */
+        .stTextInput > div > div > input::placeholder,
+        .stTextArea > div > textarea::placeholder,
+        .stSelectbox .st-emotion-cache-nahz7x p, /* Specific placeholder for selectbox */
+        [data-testid="stSelectbox"] div[data-baseweb="select"] div[data-testid="stMarkdownContainer"] p, /* Another potential selectbox target */
+        [data-testid="stForm"] input::placeholder,
+        [data-testid="stForm"] textarea::placeholder {
+            color: #95a5a6 !important;
+        }
+
+        /* Radio and Checkbox specific styles for dark mode if their background changes */
+        .stRadio div[role="radiogroup"] > label > div:first-child,
+        .stCheckbox > label > div:first-child {
+            background-color: #2c3e50 !important;
+            border-color: #4a657e !important;
+        }
+        .stRadio div[role="radiogroup"] > label > div:first-child > div, /* Inner circle of radio */
+        .stCheckbox > label > div:first-child svg { /* Checkmark of checkbox */
+            color: #ecf0f1 !important;
+        }
+
+
+        /* Adjusting any potentially hardcoded white/light elements in dark mode */
+        .stAlert, .stNotification {
+            background-color: #34495e !important;
+            color: #ecf0f1 !important;
+            border-color: #4a657e !important;
+        }
+
+        /* Full-screen image modal adjustments */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            overflow: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex; /* Use flexbox for centering */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 98vw;
+            max-height: 98vh;
+            object-fit: contain; /* Ensure image scales correctly without cropping */
+            position: relative; /* Changed from absolute to relative for better flexbox interaction */
+            transform: none; /* Reset transform as flexbox handles centering */
+            transition: all 0.3s ease; /* Transition for all properties */
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+
+        .modal.show .modal-content {
+            transform: none; /* No transform needed, flexbox handles centering */
+            max-width: 98vw;
+            max-height: 98vh;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
     }
 
     /* Header styling with animation */
@@ -560,7 +729,7 @@ def main():
                 # Enhanced image container with fullscreen button
                 st.markdown(f"""
                 <div class="image-container">
-                    <img src="{st.session_state.image_url}" alt="{style} Home Design Inspiration">
+                    <img src="{st.session_state.image_url}" alt="{style} Home Design Inspiration" onclick="openFullScreen(this)">
                     <button class="fullscreen-button" onclick="openFullScreen(this.parentElement.querySelector('img'))">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
