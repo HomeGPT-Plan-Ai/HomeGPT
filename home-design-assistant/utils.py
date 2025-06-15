@@ -13,10 +13,22 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 @st.cache_data(ttl=3600)  # Cache for 1 hour
-def generate_design_idea(style, size, rooms, model_name="gemini-1.5-flash"):
+def generate_design_idea(style, size, rooms, model_name="gemini-1.5-flash", **kwargs):
     """
     Generate custom home design plan using Google's Gemini AI
     """
+    # Extract additional parameters from kwargs
+    room_details = kwargs.get('room_details', {})
+    num_bedrooms = kwargs.get('num_bedrooms', 3)
+    num_bathrooms = kwargs.get('num_bathrooms', 2)
+    num_doors = kwargs.get('num_doors', 2)
+    num_windows = kwargs.get('num_windows', 8)
+    ceiling_height = kwargs.get('ceiling_height', 'Standard (8ft)')
+    floor_material = kwargs.get('floor_material', 'Hardwood')
+    additional_requirements = kwargs.get('additional_requirements', '')
+    timeline = kwargs.get('timeline', 'Not specified')
+    priority = kwargs.get('priority', 'Not specified')
+    
     # Context for the AI model
     context = f"""
     You are an expert home designer and architect. Create a comprehensive custom home design plan with the following specifications:
@@ -24,6 +36,23 @@ def generate_design_idea(style, size, rooms, model_name="gemini-1.5-flash"):
     Style: {style}
     Size: {size}
     Number of Rooms: {rooms}
+    
+    Room Configuration:
+    - Bedrooms: {num_bedrooms}
+    - Bathrooms: {num_bathrooms}
+    - Exterior Doors: {num_doors}
+    - Windows: {num_windows}
+    - Ceiling Height: {ceiling_height}
+    - Floor Material: {floor_material}
+    
+    Room Details:
+    {format_room_details(room_details)}
+    
+    Additional Requirements:
+    {additional_requirements}
+    
+    Project Timeline: {timeline}
+    Design Priority: {priority}
     
     Please provide a detailed design plan that includes:
     1. Overall layout and floor plan description
@@ -36,9 +65,15 @@ def generate_design_idea(style, size, rooms, model_name="gemini-1.5-flash"):
     8. Outdoor space planning (if applicable)
     9. Energy efficiency considerations
     10. Estimated timeline and budget considerations
+    11. Door and window placement strategy
+    12. Storage solutions and organization
+    13. Accessibility features
+    14. Smart home integration recommendations
+    15. Maintenance considerations
     
     Format the response in clear, organized Markdown with headers and bullet points.
     Make it detailed, practical, and tailored to the specified style and requirements.
+    Consider the project timeline and priority in your recommendations.
     """
     
     try:
@@ -71,8 +106,33 @@ def generate_design_idea(style, size, rooms, model_name="gemini-1.5-flash"):
             
     except Exception as e:
         logger.error(f"Error generating design: {e}")
-        return f"""
-# Mock Design Plan (due to API quota exhaustion or error: {str(e)})
+        return generate_fallback_design(style, size, rooms, room_details, num_bedrooms, num_bathrooms, 
+                                      num_doors, num_windows, ceiling_height, floor_material, 
+                                      additional_requirements, timeline, priority)
+
+def format_room_details(room_details):
+    """
+    Format room details for the AI prompt
+    """
+    formatted_details = []
+    for room_name, details in room_details.items():
+        room_info = f"\n{room_name.replace('_', ' ').title()}:\n"
+        for key, value in details.items():
+            if isinstance(value, list):
+                room_info += f"- {key.replace('_', ' ').title()}: {', '.join(value)}\n"
+            else:
+                room_info += f"- {key.replace('_', ' ').title()}: {value}\n"
+        formatted_details.append(room_info)
+    return "\n".join(formatted_details)
+
+def generate_fallback_design(style, size, rooms, room_details, num_bedrooms, num_bathrooms, 
+                           num_doors, num_windows, ceiling_height, floor_material, 
+                           additional_requirements, timeline, priority):
+    """
+    Generate a fallback design plan when the AI model fails
+    """
+    return f"""
+# Mock Design Plan (due to API quota exhaustion or error)
 
 ## 📋 Your Custom Home Design Plan
 
@@ -81,37 +141,63 @@ This **{style}** home, approximately **{size}** with **{rooms}** rooms, features
 
 ### 2. Room-by-Room Breakdown
 
-*   **Living Room:** (18ft x 15ft) - Spacious and bright, ideal for entertaining.
-*   **Kitchen:** (12ft x 10ft) - Modern kitchen with island and ample storage.
-*   **Dining Area:** (10ft x 10ft) - Adjacent to the kitchen, perfect for family meals.
-*   **Master Bedroom:** (14ft x 16ft) - Ensuite bathroom and walk-in closet.
-*   **Guest Bedroom:** (12ft x 12ft) - Comfortable space for visitors.
-*   **Home Office:** (10ft x 10ft) - Quiet area for productivity.
+*   **Living Room:** {room_details.get('living_room', {}).get('size', '18ft x 15ft')} - Spacious and bright, ideal for entertaining.
+*   **Kitchen:** {room_details.get('kitchen', {}).get('size', '12ft x 10ft')} - Modern kitchen with island and ample storage.
+*   **Master Bedroom:** {room_details.get('master_bedroom', {}).get('size', '14ft x 16ft')} - Ensuite bathroom and walk-in closet.
+*   **Additional Bedrooms:** {num_bedrooms - 1} bedrooms of varying sizes
+*   **Bathrooms:** {num_bathrooms} bathrooms, including master ensuite
 
 ### 3. Architectural Features and Design Elements
-Clean lines, large windows, and a minimalist aesthetic define the **{style}** style. Features include a flat roof, cantilevered sections, and a blend of natural wood and concrete elements.
+Clean lines, large windows ({num_windows} total), and a minimalist aesthetic define the **{style}** style. Features include:
+* {ceiling_height} ceilings throughout
+* {floor_material} flooring
+* {num_doors} exterior doors strategically placed
+* Large windows for natural light
+* Open floor plan concept
 
 ### 4. Color Scheme Recommendations
 Neutral palette with shades of gray, white, and beige. Accent colors like deep blues or forest greens can be introduced through decor.
 
 ### 5. Material Suggestions
-Polished concrete floors, exposed timber beams, large glass panels, and natural stone accents for both interior and exterior.
+* {floor_material} for main living areas
+* Natural stone accents
+* High-quality cabinetry
+* Durable countertops
+* Energy-efficient windows
 
 ### 6. Lighting and Electrical Considerations
-Recessed LED lighting throughout, smart home integration for lighting control, and ample power outlets in all rooms. Accent lighting for architectural features.
+* Recessed LED lighting throughout
+* Smart home integration
+* Ample power outlets in all rooms
+* Accent lighting for architectural features
 
 ### 7. Furniture and Decor Recommendations
-Minimalist furniture with clean lines. Focus on functional pieces with subtle textures. Large abstract art pieces and indoor plants to add warmth.
+* Minimalist furniture with clean lines
+* Focus on functional pieces
+* Large abstract art pieces
+* Indoor plants for warmth
 
 ### 8. Outdoor Space Planning
-A spacious rooftop terrace with panoramic views, featuring a minimalist seating area and integrated planters for greenery. A small, low-maintenance garden at ground level.
+* Spacious patio/deck
+* Landscaped garden area
+* Outdoor entertainment space
+* Storage for outdoor equipment
 
 ### 9. Energy Efficiency Considerations
-Solar panels on the roof, high-performance insulation, double-glazed windows, and a rainwater harvesting system for irrigation. Smart thermostat for climate control.
+* High-performance insulation
+* Energy-efficient windows
+* Smart thermostat
+* LED lighting throughout
+* Solar panel ready
 
-### 10. Estimated Timeline and Budget Considerations
-**Timeline:** Approximately 12-18 months for design and construction.
-**Budget:** Estimated **{size}** home cost for **{style}** design: [Insert a general cost range here, e.g., $300,000 - $600,000, depending on region and finishes].
+### 10. Project Timeline and Budget
+* Timeline: {timeline}
+* Priority Focus: {priority}
+* Estimated completion: Based on {timeline} timeline
+* Budget considerations aligned with {priority} priority
+
+### 11. Additional Features
+{additional_requirements}
 
 This design plan provides a starting point; further customization and professional consultation are recommended.
 """
